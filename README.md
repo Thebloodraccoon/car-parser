@@ -1,103 +1,84 @@
-# Project Documentation
+# Car Parser
 
-## Project Overview
+Car Parser is a web scraper project with a RESTfull API backend built using **FastAPI** and **MongoDB**.
+It is designed to scrape car listings and serve them via an API. 
+The project is containerized using **Docker** and **Docker Compose**.
 
-This project is designed to scrape data from various websites. Each parser is implemented as a separate class responsible for handling a specific website. Data scraping is performed using asynchronous requests and frameworks like **Playwright** and **httpx**.
+---
+## 🚀 Requirements
 
-The project is containerized using **Docker** to ensure easy deployment and execution across different environments.
+- Docker & Docker Compose
+- Python 3.11+ 
+- MongoDB
+- Optional: Mongo Express for easy DB visualization
 
 ---
 
-## Requirements
+## ⚙️ Environment Configuration
 
-- **Docker**
-- **Docker Compose**
-- **Python 3.10+**
-
----
-
-## Getting Started
-
-### 1. Clone the Repository
-
-Start by cloning the project repository to your local machine:
-
-```bash
- git clone https://bitbucket.org/likebus/likebus-dynamic-pricing-system/src/main/
- cd likebus-dynamic-pricing-system
-```
-
-### 3. Configure Environment Variables
-
-Before running the project, make sure to configure your environment variables. 
-
-Create a .env file in the root directory of the project and define the necessary variables. For example:
+Create your `.env` file using the provided `.env.example` as a template:
 
 ```aiignore
-# Production Database
-POSTGRES_USER=
-POSTGRES_PASSWORD=
-POSTGRES_DB=
-POSTGRES_HOST=
-POSTGRES_PORT=
+# MongoDB settings
+MONGODB_URL=mongodb://mongodb:27017
+MONGODB_DB=car_listings
+MONGODB_COLLECTION=cars
 
-# Test Database
-TEST_POSTGRES_USER=
-TEST_POSTGRES_PASSWORD=
-TEST_POSTGRES_DB=
-TEST_POSTGRES_HOST=
-TEST_POSTGRES_PORT=
+# Mongo Express settings
+ME_CONFIG_MONGODB_SERVER=mongodb
+ME_CONFIG_MONGODB_PORT=27017
+ME_CONFIG_BASICAUTH_USERNAME=admin
+ME_CONFIG_BASICAUTH_PASSWORD=your_password_here
 
-# PGadmin
-PGADMIN_DEFAULT_EMAIL=
-PGADMIN_DEFAULT_PASSWORD=
+# Proxy settings
+PROXY=your_proxy_here
 ```
 
-### Start the Docker Containers
+---
 
-```
+## 🐳 Running with Docker
+
+### Build and run containers
+
+```bash
 docker-compose up --build
 ```
 
-## Project Documentation: Running Without Docker (with Playwright)
+The FastAPI backend will be accessible at: [http://localhost:8000](http://localhost:8000)
 
-## 1. Prerequisites
+### Run the scraper
 
-Before running the project, ensure you have the following software installed:
-
-- **Python 3.10+**: Make sure Python is installed on your system. You can download it from the [official Python website](https://www.python.org/downloads/).
-- **Playwright**: We use Playwright for browser automation. Follow these steps to install it.
-  - Install the Playwright package:
-    ```bash
-    pip install playwright
-    ```
-  - Install the necessary browsers:
-    ```bash
-    playwright install
-    ```
-
-- **PostgreSQL (or other database)**: If you're using a local PostgreSQL database, ensure it's installed and running. You can follow the [installation guide](https://www.postgresql.org/download/) for your operating system.
-
-
-## 2. Install Dependencies
-Create a virtual environment and install the required dependencies:
+To start the scraper:
 
 ```bash
- python -m venv venv
- source venv/bin/activate   # On Windows, use `venv\Scripts\activate`
- pip install -r requirements.txt
+docker exec -it car_parser bash
+python app/scraper/main.py
 ```
 
+---
 
-## 3. Run the Database Migrations
+## 📘 API Reference
 
-```bash
- alembic upgrade head
-```
+### 🔹 Cars
 
-## 4. Running the Application
+| Method | Endpoint                  | Description                          |
+|--------|---------------------------|--------------------------------------|
+| GET    | `/cars/`                  | Get all cars (with pagination)       |
+| GET    | `/cars/{car_id}`          | Get a specific car by ID             |
+| GET    | `/cars/make/{make}`       | Get cars filtered by make            |
+| GET    | `/cars/year/{year}`       | Get cars filtered by production year |
+| POST   | `/cars/`                  | Create a new car                     |
+| PUT    | `/cars/{car_id}`          | Update car details by ID             |
+| DELETE | `/cars/{car_id}`          | Delete a car by ID                   |
 
-```bash
- python main.py
-```
+### 🔹 Users
 
+| Method | Endpoint                  | Description                |
+|--------|---------------------------|----------------------------|
+| POST   | `/users/`                 | Create a new user          |
+| GET    | `/users/`                 | Get all users              |
+| GET    | `/users/{user_id}`        | Get a user by ID           |
+| PUT    | `/users/{user_id}`        | Update user info by ID     |
+| DELETE | `/users/{user_id}`        | Delete a user by ID        |
+
+---
