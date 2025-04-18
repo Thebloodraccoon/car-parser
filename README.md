@@ -35,8 +35,8 @@ ME_CONFIG_MONGODB_PORT=27017
 ME_CONFIG_BASICAUTH_USERNAME=admin
 ME_CONFIG_BASICAUTH_PASSWORD=your_password_here
 
-# Proxy settings
-PROXY=your_proxy_here
+# Proxy server settings
+PROXY=your_proxy_server_here
 ```
 
 ---
