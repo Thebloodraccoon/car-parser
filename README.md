@@ -1,15 +1,15 @@
 # Car Parser
 
-Car Parser is a web scraper project with a RESTfull API backend built using **FastAPI** and **MongoDB**.
-It is designed to scrape car listings and serve them via an API. 
-The project is containerized using **Docker** and **Docker Compose**.
+Car Parser is a web scraper project with a RESTful API backend built using **FastAPI** and **MongoDB**. It is designed to scrape car listings and serve them via an API. The project is containerized using **Docker** and **Docker Compose**.
 
 ---
+
 ## 🚀 Requirements
 
 - Docker & Docker Compose
-- Python 3.11+ 
+- Python 3.11+ (for development outside containers)
 - MongoDB
+- Redis (used for caching or task queue if integrated)
 - Optional: Mongo Express for easy DB visualization
 
 ---
@@ -18,11 +18,16 @@ The project is containerized using **Docker** and **Docker Compose**.
 
 Create your `.env` file using the provided `.env.example` as a template:
 
-```aiignore
+```env
 # MongoDB settings
 MONGODB_URL=mongodb://mongodb:27017
 MONGODB_DB=car_listings
 MONGODB_COLLECTION=cars
+
+# Redis settings
+HOST_REDIS=redis
+PORT_REDIS=6379
+DB_REDIS=0
 
 # Mongo Express settings
 ME_CONFIG_MONGODB_SERVER=mongodb
@@ -41,21 +46,46 @@ PROXY=your_proxy_here
 ### Build and run containers
 
 ```bash
- python -m venv venv
- source venv/bin/activate   # On Windows, use `venv\Scripts\activate`
- pip install -r requirements.txt
+docker-compose up --build
 ```
 
+The FastAPI backend will be accessible at: [http://localhost:8000](http://localhost:8000)
 
-## 3. Run the Database Migrations
+Mongo Express (if configured) will be available at: [http://localhost:8081](http://localhost:8081)
+
+### Run the scraper
+
+To start the scraper manually:
 
 ```bash
- alembic upgrade head
+docker exec -it car_parser bash
+python app/scraper/main.py
 ```
 
-## 4. Running the Application
+---
 
-```bash
- python main.py
-```
+## 📘 API Reference
 
+### 🔹 Cars
+
+| Method | Endpoint                  | Description                          |
+|--------|---------------------------|--------------------------------------|
+| GET    | `/cars/`                  | Get all cars (with pagination)       |
+| GET    | `/cars/{car_id}`          | Get a specific car by ID             |
+| GET    | `/cars/make/{make}`       | Get cars filtered by make            |
+| GET    | `/cars/year/{year}`       | Get cars filtered by production year |
+| POST   | `/cars/`                  | Create a new car                     |
+| PUT    | `/cars/{car_id}`          | Update car details by ID             |
+| DELETE | `/cars/{car_id}`          | Delete a car by ID                   |
+
+### 🔹 Users
+
+| Method | Endpoint                  | Description                |
+|--------|---------------------------|----------------------------|
+| POST   | `/users/`                 | Create a new user          |
+| GET    | `/users/`                 | Get all users              |
+| GET    | `/users/{user_id}`        | Get a user by ID           |
+| PUT    | `/users/{user_id}`        | Update user info by ID     |
+| DELETE | `/users/{user_id}`        | Delete a user by ID        |
+
+---
