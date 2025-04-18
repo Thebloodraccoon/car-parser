@@ -41,44 +41,21 @@ PROXY=your_proxy_here
 ### Build and run containers
 
 ```bash
-docker-compose up --build
+ python -m venv venv
+ source venv/bin/activate   # On Windows, use `venv\Scripts\activate`
+ pip install -r requirements.txt
 ```
 
-The FastAPI backend will be accessible at: [http://localhost:8000](http://localhost:8000)
 
-### Run the scraper
-
-To start the scraper:
+## 3. Run the Database Migrations
 
 ```bash
-docker exec -it car_parser bash
-python app/scraper/main.py
+ alembic upgrade head
 ```
 
----
+## 4. Running the Application
 
-## 📘 API Reference
+```bash
+ python main.py
+```
 
-### 🔹 Cars
-
-| Method | Endpoint                  | Description                          |
-|--------|---------------------------|--------------------------------------|
-| GET    | `/cars/`                  | Get all cars (with pagination)       |
-| GET    | `/cars/{car_id}`          | Get a specific car by ID             |
-| GET    | `/cars/make/{make}`       | Get cars filtered by make            |
-| GET    | `/cars/year/{year}`       | Get cars filtered by production year |
-| POST   | `/cars/`                  | Create a new car                     |
-| PUT    | `/cars/{car_id}`          | Update car details by ID             |
-| DELETE | `/cars/{car_id}`          | Delete a car by ID                   |
-
-### 🔹 Users
-
-| Method | Endpoint                  | Description                |
-|--------|---------------------------|----------------------------|
-| POST   | `/users/`                 | Create a new user          |
-| GET    | `/users/`                 | Get all users              |
-| GET    | `/users/{user_id}`        | Get a user by ID           |
-| PUT    | `/users/{user_id}`        | Update user info by ID     |
-| DELETE | `/users/{user_id}`        | Delete a user by ID        |
-
----
