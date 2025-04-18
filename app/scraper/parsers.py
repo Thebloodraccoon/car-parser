@@ -96,7 +96,7 @@ def parse_announce(ticket_item, sitename, source_url) -> dict:
         car_data = {
             "make": make or "Unknown",
             "model": model or "Unknown",
-            "year": int(year) if year and year.isdigit() else 2000,  # Default year
+            "year": int(year) if year and year.isdigit() else 2000,  
             "price": price_uah or 0.0,
             "mileage": mileage,
             "engine_type": engine_type,
