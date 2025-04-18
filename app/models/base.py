@@ -5,7 +5,6 @@ from pydantic_core import core_schema
 class PyObjectId(ObjectId):
     @classmethod
     def __get_validators__(cls):
-        # For backwards compatibility
         yield cls.validate
 
     @classmethod
