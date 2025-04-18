@@ -51,3 +51,4 @@ build/
 /celerybeat-schedule
 
 .idea
+.idea/*
