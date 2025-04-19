@@ -4,7 +4,7 @@ from fastapi import APIRouter, status, Depends
 
 from app.db.users_db import UserCRUD
 from app.schemas.users import UserCreate, UserUpdate, UserResponse
-
+from app.utils.auth import get_current_user
 
 router = APIRouter()
 
@@ -18,6 +18,7 @@ async def get_user_crud() -> UserCRUD:
 async def create_user(
     user: UserCreate,
     user_crud: UserCRUD = Depends(get_user_crud),
+    _: UserResponse = Depends(get_current_user),
 ):
     return await user_crud.create_user(user)
 
@@ -25,6 +26,7 @@ async def create_user(
 @router.get("/", response_model=List[UserResponse])
 async def get_users(
     user_crud: UserCRUD = Depends(get_user_crud),
+    _: UserResponse = Depends(get_current_user),
 ):
     return await user_crud.get_all_users()
 
@@ -33,6 +35,7 @@ async def get_users(
 async def get_user_by_id(
     user_id: str,
     user_crud: UserCRUD = Depends(get_user_crud),
+    _: UserResponse = Depends(get_current_user),
 ):
     return await user_crud.get_user_by_id(user_id)
 
@@ -42,6 +45,7 @@ async def update_user(
     user_id: str,
     user_update: UserUpdate,
     user_crud: UserCRUD = Depends(get_user_crud),
+    _: UserResponse = Depends(get_current_user),
 ):
     return await user_crud.update_user(user_id, user_update)
 
@@ -50,5 +54,6 @@ async def update_user(
 async def delete_user(
     user_id: str,
     user_crud: UserCRUD = Depends(get_user_crud),
+    _: UserResponse = Depends(get_current_user),
 ):
     return await user_crud.delete_user(user_id)

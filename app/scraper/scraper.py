@@ -81,7 +81,9 @@ async def process_makes_chunk(
     return results
 
 
-async def run_parser(base_url: str, site_name: str, threads: int = 5, makes: List[str] = None) -> Dict[str, int]:
+async def run_parser(
+    base_url: str, site_name: str, threads: int = 5, makes: List[str] = None
+) -> Dict[str, int]:
     """Run a parser with specified number of threads."""
     try:
         logger.info("Getting car makes...")
@@ -137,5 +139,3 @@ async def run(base_url: str, site_name: str, threads: int = 5, makes: List[str] 
         error_details = traceback.format_exc()
         logger.error(f"Error running parser for {site_name}: {e}\n{error_details}")
         return {"processed": 0, "saved": 0, "errors": 1}
-
-

@@ -77,15 +77,18 @@ class UserCRUD:
             raise UserNotFoundException()
         await self.collection.delete_one({"_id": ObjectId(user_id)})
 
-    async def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+    async def get_user_by_email(self, email: str) -> Optional[User]:
         return await self.collection.find_one({"email": email})
 
     async def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         return await self.collection.find_one({"username": username})
-
 
     async def _check_if_user_exists(self, email: EmailStr, username: str) -> bool:
         count = await self.collection.count_documents(
             {"$or": [{"email": str(email)}, {"username": username}]}
         )
         return count > 0
+
+    async def update_user_last_login(self, user: User):
+        user["last_login"] = datetime.now()
+        await self.collection.update_one({"_id": ObjectId(user["_id"])}, {"$set": user})

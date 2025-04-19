@@ -9,7 +9,7 @@ Car Parser is a web scraper project with a RESTful API backend built using **Fas
 - Docker & Docker Compose
 - Python 3.11+ (for development outside containers)
 - MongoDB
-- Redis (used for caching or task queue if integrated)
+- Redis (used for caching and use for logout)
 - Optional: Mongo Express for easy DB visualization
 
 ---
@@ -37,6 +37,21 @@ ME_CONFIG_BASICAUTH_PASSWORD=your_password_here
 
 # Proxy settings
 PROXY=your_proxy_here
+
+# JWT
+JWT_SECRET_KEY=your_secret
+JWT_ALGORITHM=HS256
+
+# Redis
+HOST_REDIS=redis
+PORT_REDIS=6379
+DB_REDIS=0
+
+# Default user, password need to be at least 8 charset
+DEFAULT_USER_NAME = admin
+DEFAULT_USER_EMAIL = admin@admin.com
+DEFAULT_USER_PASSWORD = admin_password 
+
 ```
 
 ---
@@ -66,7 +81,18 @@ python app/scraper/main.py
 
 ## 📘 API Reference
 
+### 🔹 Auth
+
+| Method | Endpoint        | Description                                                          |
+|--------|-----------------|----------------------------------------------------------------------|
+| POST    | `/auth/login`   | Login user and return access token and set refresh token in cookie   |
+| POST    | `/auth/refresh` | Return new access token by refresh                                   |
+| POST    | `/auth/logout`  | Blacklist current access token                                       |
+
+
 ### 🔹 Cars
+
+All endpoints required to be logined
 
 | Method | Endpoint                  | Description                          |
 |--------|---------------------------|--------------------------------------|
@@ -80,6 +106,8 @@ python app/scraper/main.py
 
 ### 🔹 Users
 
+All endpoints required to be logined
+
 | Method | Endpoint                  | Description                |
 |--------|---------------------------|----------------------------|
 | POST   | `/users/`                 | Create a new user          |
@@ -89,3 +117,8 @@ python app/scraper/main.py
 | DELETE | `/users/{user_id}`        | Delete a user by ID        |
 
 ---
+
+### Default user 
+
+- email: admin@admin.com
+- password: admin_password

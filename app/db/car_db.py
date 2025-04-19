@@ -112,13 +112,21 @@ class CarCRUD:
         count = await self.collection.count_documents(query)
         return count > 0
 
-    async def get_cars_by_make(self, make: str, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
+    async def get_cars_by_make(
+        self, make: str, skip: int = 0, limit: int = 100
+    ) -> List[Dict[str, Any]]:
         """Get cars filtered by make."""
-        cursor = self.collection.find({"make": {"$regex": f"^{make}$", "$options": "i"}}).skip(skip).limit(limit)
+        cursor = (
+            self.collection.find({"make": {"$regex": f"^{make}$", "$options": "i"}})
+            .skip(skip)
+            .limit(limit)
+        )
         cars = await cursor.to_list(length=limit)
         return [convert_object_id_to_str(car) for car in cars]
 
-    async def get_cars_by_year(self, year: int, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
+    async def get_cars_by_year(
+        self, year: int, skip: int = 0, limit: int = 100
+    ) -> List[Dict[str, Any]]:
         """Get cars filtered by production year."""
         cursor = self.collection.find({"year": year}).skip(skip).limit(limit)
         cars = await cursor.to_list(length=limit)

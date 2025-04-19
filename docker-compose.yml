@@ -9,8 +9,8 @@ services:
     volumes:
       - .:/app
     depends_on:
-      mongodb:
-        condition: service_healthy
+      - mongodb
+      - redis
     networks:
       - app-network
     env_file:
@@ -46,9 +46,20 @@ services:
       - app-network
     restart: always
 
+  redis:
+    image: redis:alpine
+    container_name: redis_parser
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   mongodb_data:
+  redis_data:
