@@ -117,8 +117,3 @@ All endpoints required to be logined
 | DELETE | `/users/{user_id}`        | Delete a user by ID        |
 
 ---
-
-### Default user 
-
-- email: admin@admin.com
-- password: admin_password
