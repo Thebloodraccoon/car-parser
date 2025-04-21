@@ -8,7 +8,7 @@ async def main():
     makes = ["AUDI", "TOYOTA", "Mercedes-Benz", "BMW", "HONDA", "RENO", "FIAT"]
 
     threads = 40
-    site = "autobazar" # or autoria
+    site = "autobazar"  # or autoria
 
     await run(
         site=site,
