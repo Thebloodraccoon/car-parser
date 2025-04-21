@@ -98,13 +98,16 @@ class CarCRUD:
     async def check_if_car_exists(self, car_data: dict) -> bool:
         """Check if a car with the given attributes already exists."""
         query = {
-            "source_site": car_data.get("source_site"),
             "make": car_data.get("make"),
             "model": car_data.get("model"),
             "year": car_data.get("year"),
             "price": car_data.get("price"),
             "mileage": car_data.get("mileage"),
+            "engine_type": car_data.get("engine_type"),
+            "engine_capacity": car_data.get("engine_capacity"),
+            "transmission": car_data.get("transmission"),
             "location": car_data.get("location"),
+            "source_site": car_data.get("source_site"),
         }
 
         query = {k: v for k, v in query.items() if v is not None}

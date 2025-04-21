@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List, Dict
+from typing import Optional
 
 import httpx
 from tenacity import (
@@ -12,9 +12,9 @@ from tenacity import (
 )
 
 from app.conf import ua, PROXY
-from parsers import extract_ticket_items
+from app.scraper.utils.logger import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger("app.scraper.utils.http_client")
 
 HEADERS = {
     "User-Agent": ua.random,
@@ -65,46 +65,3 @@ async def send_request(
         response.raise_for_status()
         return response
     return None
-
-
-async def get_car_brands() -> List[str]:
-    """Get list of car brands from NHTSA API."""
-    url = "https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes?format=json"
-
-    response = await send_request(
-        url=url,
-        method="GET",
-        headers=HEADERS,
-    )
-
-    data = response.json()
-    makes = [make["Make_Name"] for make in data["Results"]]
-    return makes
-
-
-async def get_content(base_url: str, make: str, page: int = 1) -> Optional[Dict]:
-    """Get content from API for a specific make and page."""
-    try:
-        url = f"{base_url}/uk/car/{make}/"
-        response = await send_request(
-            url=url,
-            method="GET",
-            headers=HEADERS,
-            params={
-                "page": page,
-            },
-        )
-
-        if response and response.status_code == 200:
-            html_content = response.text
-            ticket_items = extract_ticket_items(html_content)
-
-            return {"results": ticket_items}
-        else:
-            logger.error(
-                f"Failed to get data for make {make}: {response.status_code if response else 'No response'}"
-            )
-            return None
-    except Exception as e:
-        logger.error(f"Error fetching data for make {make}: {e}")
-        return None

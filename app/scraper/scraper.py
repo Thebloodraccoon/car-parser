@@ -1,39 +1,30 @@
 import asyncio
-import logging
-import sys
 import traceback
 from typing import Dict, List
 
-from http_client import get_car_brands, get_content
-from parsers import parse_data, transform_make_for_source
-from data_processors import process_car_data
-from utils import chunk_list
+from app.scraper.parsers.factory import create_parser
+from app.scraper.utils.logger import setup_logger
+from app.scraper.utils.utils import chunk_list, process_car_data
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("parser.log")],
-)
-logger = logging.getLogger(__name__)
+logger = setup_logger("app.scraper")
 
 
-async def process_make(
-    base_url: str, site_name: str, make: str, semaphore: asyncio.Semaphore
-) -> Dict[str, int]:
+async def process_make(parser, make, semaphore: asyncio.Semaphore) -> Dict[str, int]:
     """Process a single make with semaphore control."""
     results = {"processed": 0, "saved": 0, "errors": 0}
 
+    make_name = make.get("title") if isinstance(make, dict) else make
+
     async with semaphore:
         try:
-            logger.info(f"Processing make: {make}")
-            source_make = transform_make_for_source(make)
-            content = await get_content(base_url, source_make)
+            logger.info(f"Processing make: {make_name}")
+            content = await parser.get_content(make)
 
             if not content:
-                logger.warning(f"No content found for make: {make}")
+                logger.warning(f"No content found for make: {make_name}")
                 return results
 
-            cars = parse_data(content, site_name, make, base_url)
+            cars = parser.parse_data(content, make)
             results["processed"] = len(cars)
 
             for car_data in cars:
@@ -42,33 +33,30 @@ async def process_make(
                     if saved:
                         results["saved"] += 1
                 except Exception as e:
-                    error_details = traceback.format_exc()
-                    logger.error(
-                        f"Error processing car for make {make}: {e}\n{error_details}"
-                    )
+                    logger.error(f"Error processing car for make {make_name}: {e}")
                     results["errors"] += 1
 
             logger.info(
-                f"Completed processing make {make}. Processed: {results['processed']}, Saved: {results['saved']}, Errors: {results['errors']}"
+                f"Completed processing make {make_name}. Processed: {results['processed']}, "
+                f"Saved: {results['saved']}, Errors: {results['errors']}"
             )
             return results
 
         except Exception as e:
-            error_details = traceback.format_exc()
-            logger.error(f"Error processing make {make}: {e}\n{error_details}")
+            logger.error(f"Error processing make {make_name}: {e}\n")
             results["errors"] += 1
             return results
 
 
 async def process_makes_chunk(
-    base_url: str, site_name: str, makes_chunk: List[str], semaphore: asyncio.Semaphore
+    parser, makes_chunk: List[str], semaphore: asyncio.Semaphore
 ) -> Dict[str, int]:
     """Process a chunk of makes."""
     tasks = []
     results = {"processed": 0, "saved": 0, "errors": 0}
 
     for make in makes_chunk:
-        task = asyncio.create_task(process_make(base_url, site_name, make, semaphore))
+        task = asyncio.create_task(process_make(parser, make, semaphore))
         tasks.append(task)
 
     make_results = await asyncio.gather(*tasks)
@@ -82,7 +70,7 @@ async def process_makes_chunk(
 
 
 async def run_parser(
-    base_url: str, site_name: str, threads: int = 5, makes: List[str] = None
+    parser, threads: int = 5, makes: List[str] = None
 ) -> Dict[str, int]:
     """Run a parser with specified number of threads."""
     try:
@@ -105,9 +93,7 @@ async def run_parser(
 
         tasks = []
         for chunk in make_chunks:
-            task = asyncio.create_task(
-                process_makes_chunk(base_url, site_name, chunk, semaphore)
-            )
+            task = asyncio.create_task(process_makes_chunk(parser, chunk, semaphore))
             tasks.append(task)
 
         chunk_results = await asyncio.gather(*tasks)
@@ -119,23 +105,34 @@ async def run_parser(
             total_results["errors"] += result["errors"]
 
         logger.info(
-            f"Parser run completed. Processed: {total_results['processed']}, Saved: {total_results['saved']}, Errors: {total_results['errors']}"
+            f"Parser run completed. Processed: {total_results['processed']} Saved: {total_results['saved']}, Errors: {total_results['errors']}"
         )
         return total_results
     except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f"Error running parser for {site_name}: {e}\n{error_details}")
+        logger.error(f"Error running parser: {e}")
         return {"processed": 0, "saved": 0, "errors": 1}
 
 
-async def run(base_url: str, site_name: str, threads: int = 5, makes: List[str] = None):
+async def run(
+    site: str,
+    threads: int = 5,
+    makes: List[str] = [],
+):
     """Run the parser with the given parameters."""
     try:
-        logger.info(f"Starting parser for site: {site_name}")
-        results = await run_parser(base_url, site_name, threads, makes)
+        logger.info(f"Starting parser for site: {site}")
+
+        parser = create_parser(site)
+        site_name = parser.site_name
+        if not parser:
+            logger.error(f"No parser implementation found for site type: {site_name}")
+            return {"processed": 0, "saved": 0, "errors": 1}
+
+        makes = await parser.get_car_brands(makes)
+
+        results = await run_parser(parser, threads, makes)
         logger.info(f"Parser for {site_name} completed with results: {results}")
         return results
     except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f"Error running parser for {site_name}: {e}\n{error_details}")
+        logger.error(f"Error running parser for {site_name}: {e}")
         return {"processed": 0, "saved": 0, "errors": 1}

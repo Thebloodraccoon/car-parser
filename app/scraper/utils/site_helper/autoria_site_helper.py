@@ -1,26 +1,22 @@
-import logging
 import re
-from typing import List, Dict
-from bs4 import BeautifulSoup, ResultSet, PageElement, Tag, NavigableString
 
-logger = logging.getLogger(__name__)
+import bs4
 
+from app.scraper.utils.logger import setup_logger
 
-def transform_make_for_source(make: str) -> str:
-    """Transform make name to format expected by source site."""
-    return make.lower().replace(" ", "-")
+logger = setup_logger("app.scraper.utils.site_helper.autoria_site_helper")
 
 
 def extract_ticket_items(
     html_content: str,
-) -> ResultSet[PageElement | Tag | NavigableString]:
+) -> bs4.ResultSet[bs4.PageElement | bs4.Tag | bs4.NavigableString]:
     """Extract all ticket-item sections from the HTML content."""
-    soup = BeautifulSoup(html_content, "html.parser")
+    soup = bs4.BeautifulSoup(html_content, "html.parser")
     ticket_items = soup.find_all("section", class_="ticket-item")
     return ticket_items
 
 
-def parse_announce(ticket_item, sitename, source_url) -> dict:
+def parse_announce(ticket_item, site_name, source_url) -> dict:
     """Parse a car announcement from HTML ticket item."""
     try:
         data_div = ticket_item.find("div", attrs={"data-advertisement-data": True})
@@ -96,7 +92,7 @@ def parse_announce(ticket_item, sitename, source_url) -> dict:
         car_data = {
             "make": make or "Unknown",
             "model": model or "Unknown",
-            "year": int(year) if year and year.isdigit() else 2000,  
+            "year": int(year) if year and year.isdigit() else 2000,
             "price": price_uah or 0.0,
             "mileage": mileage,
             "engine_type": engine_type,
@@ -105,32 +101,10 @@ def parse_announce(ticket_item, sitename, source_url) -> dict:
             "location": location,
             "image_url": image_url,
             "source_url": full_source_url or "https://auto.ria.com",
-            "source_site": sitename or "Auto.ria",
+            "source_site": site_name or "Auto.ria",
         }
 
         return car_data
     except Exception as e:
         logger.error(f"Error parsing car announcement: {e}")
         return {}
-
-
-def parse_data(
-    content, site_name: str, make: str = "", source_url: str = "https://auto.ria.com"
-) -> List[Dict]:
-    """Parse content from HTML response into car listings."""
-    if not content or "results" not in content:
-        return []
-
-    parsed_cars = []
-    for ticket_item in content.get("results", []):
-        try:
-            announce = parse_announce(ticket_item, site_name, source_url)
-            if announce:
-                if not announce.get("make") and make:
-                    announce["make"] = make
-                announce["site_name"] = site_name
-                parsed_cars.append(announce)
-        except Exception as e:
-            logger.error(f"Error parsing car announce: {e}")
-            continue
-    return parsed_cars

@@ -1,13 +1,18 @@
-import logging
 from typing import Dict
+from typing import List
 
-from pydantic import ValidationError
+from pydantic import ValidationError, HttpUrl
 
 from app.db.car_db import CarCRUD
 from app.schemas.cars import CarCreate
+from app.scraper.utils.logger import setup_logger
+
+logger = setup_logger("app.scraper.utils.http_client")
 
 
-logger = logging.getLogger(__name__)
+def chunk_list(lst: List, chunk_size: int) -> List[List]:
+    """Split a list into chunks of specified size."""
+    return [lst[i : i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
 
 def convert_to_pydantic_model(car_data: Dict) -> CarCreate:
