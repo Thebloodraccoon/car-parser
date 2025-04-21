@@ -18,16 +18,8 @@ def chunk_list(lst: List, chunk_size: int) -> List[List]:
 def convert_to_pydantic_model(car_data: Dict) -> CarCreate:
     """Convert parsed car data to Pydantic model."""
     try:
-        source_url = car_data.get("source_url", "https://auto.ria.com")
-        if not source_url.startswith(("http://", "https://")):
-            source_url = "https://auto.ria.com"
-
+        source_url = car_data.get("source_url")
         image_url = car_data.get("image_url")
-        if image_url and not image_url.startswith(("http://", "https://")):
-            image_url = None
-
-        source_url = str(source_url)
-        image_url = str(image_url) if image_url else None
 
         car_create = CarCreate(
             make=car_data.get("make", "Unknown"),

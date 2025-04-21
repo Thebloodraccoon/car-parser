@@ -103,7 +103,7 @@ def parse_announce(ticket_item, site_name=None, source_url=None) -> dict:
             "engine_capacity": engine_capacity,
             "transmission": transmission,
             "location": location,
-            "image_url": image_url,
+            "image_url": image_url or full_source_url,
             "source_url": full_source_url,
             "source_site": site_name or "AutoBazar",
         }

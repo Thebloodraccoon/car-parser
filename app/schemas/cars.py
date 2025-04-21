@@ -105,6 +105,7 @@ class CarResponse(CarBase, BaseDBModel):
         ..., min_length=1, max_length=100, description="Source site name"
     )
     updated_at: datetime = Field(..., description="Last update timestamp")
+    image_url: Optional[HttpUrl] = None
 
     model_config = ConfigDict(
         from_attributes=True,
