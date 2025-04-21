@@ -47,7 +47,7 @@ HOST_REDIS=redis
 PORT_REDIS=6379
 DB_REDIS=0
 
-# Default user, password need to be at least 8 charset
+# Default user, password need to be at least 8 charsets
 DEFAULT_USER_NAME = admin
 DEFAULT_USER_EMAIL = admin@admin.com
 DEFAULT_USER_PASSWORD = admin_password 
